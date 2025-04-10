@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Přidat servisní úkon pro {{ vozidlo.znacka }} {{ vozidlo.model }}</h2>
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-success">Přidat úkon</button>
+        <a href="{% url 'detail_vozidla' vozidlo.pk %}" class="btn btn-secondary">Zpět</a>
+    </form>
+</div>
+{% endblock %}

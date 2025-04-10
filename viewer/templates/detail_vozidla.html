@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center">Detail vozidla</h2>
+        <div class="text-end">
+            <button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#editVozidloModal" data-url="{% url 'edit_vozidlo' vozidlo.pk %}">
+                Upravit vozidlo
+            </button>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">{{ vozidlo.znacka }} {{ vozidlo.model }}</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>SPZ:</strong> {{ vozidlo.spz }}</li>
+                    <li class="list-group-item"><strong>Rok výroby:</strong> {{ vozidlo.rok_vyroby }}</li>
+                    <li class="list-group-item"><strong>Platnost STK:</strong> {{ vozidlo.stk }}</li>
+                    <li class="list-group-item"><strong>Dálniční známka do:</strong> {{ vozidlo.dalnicni_znamka|default:"Není" }}</li>
+                    <li class="list-group-item"><strong>Povinné ručení do:</strong> {{ vozidlo.pojistka|default:"Není" }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 class="text-center">Servisní úkony</h3>
+        {% if vozidlo.servisni_ukony.all %}
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Datum</th>
+                        <th>Kilometry</th>
+                        <th>Typ úkonu</th>
+                        <th>Popis</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ukon in vozidlo.servisni_ukony.all %}
+                    <tr>
+                        <td>{{ ukon.datum }}</td>
+                        <td>{{ ukon.km }}</td>
+                        <td>{{ ukon.get_typ_display }}</td>
+                        <td>{{ ukon.popis|default:"Bez popisu" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center">Žádné provedené servisní úkony</p>
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'pridat_servisni_ukon' vozidlo.id %}" class="btn btn-success">Přidat servisní úkon</a>
+            <a href="{% url 'seznam_vozidel' %}" class="btn btn-primary">Zpět na seznam vozidel</a>
+        </div>
+    </div>
+
+<div class="modal fade" id="editVozidloModal" tabindex="-1" aria-labelledby="editVozidloLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editVozidloLabel">Upravit vozidlo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Sem se načte formulář přes AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById('editVozidloModal');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget;
+        let url = button.getAttribute('data-url');
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                modal.querySelector('.modal-body').innerHTML = html;
+            });
+    });
+
+    modal.addEventListener('submit', function(event) {
+        event.preventDefault();
+        let form = modal.querySelector("form");
+        let url = form.action;
+        let formData = new FormData(form);
+
+        fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();  // Po úspěšné editaci refresh stránky
+            } else {
+                modal.querySelector('.modal-body').innerHTML = data.errors;
+            }
+        });
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center">Seznam vozidel</h2>
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>SPZ</th>
+                    <th>Značka</th>
+                    <th>Model</th>
+                    <th>Platnost STK</th>
+                    <th>Dálniční známka do</th>
+                    <th>Povinné ručení do</th>
+                    <th>Výměna oleje (datum / km)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vozidlo in vozidla %}
+                <tr>
+                    <td><a href="{% url 'detail_vozidla' vozidlo.pk %}">{{ vozidlo.spz }}</a></td>
+                    <td>{{ vozidlo.znacka }}</td>
+                    <td>{{ vozidlo.model }}</td>
+                    <td>
+                        {% if vozidlo.dni_do_stk is not None %}
+                            {% if vozidlo.dni_do_stk < 30 %}
+                                <span class="text-danger fw-bold">{{ vozidlo.stk }}</span>
+                            {% elif vozidlo.dni_do_stk < 180 %}
+                                <span class="text-warning fw-bold">{{ vozidlo.stk }}</span>
+                            {% else %}
+                                {{ vozidlo.stk }}
+                            {% endif %}
+                        {% else %}
+                            Není dostupné
+                        {% endif %}
+                    </td>
+                    <td>{{ vozidlo.dalnicni_znamka|default:"Není" }}</td>
+                    <td>{{ vozidlo.pojistka|default:"Není" }}</td>
+                    <td>
+                        {% with vozidlo.posledni_vymena_oleje as posledni_olej %}
+                            {% if posledni_olej %}
+                                {{ posledni_olej.datum }} / {{ posledni_olej.km }}
+                            {% else %}
+                                Žádná výměna oleje
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
