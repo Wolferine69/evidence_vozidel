@@ -1,4 +1,6 @@
 # Evidence vozidel
+![obrazek](https://github.com/user-attachments/assets/310210b2-825b-4b31-99c1-ebdebe050aa9)
+
 
 Tento projekt je vytvořen pomocí Python frameworku **Django** a slouží k evidenci vozidel a jejich servisních záznamů.
 
